@@ -7,11 +7,11 @@
 
 /** Imports for the project */
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.KeyEvent;
 
 import acm.graphics.*;
 import acm.program.GraphicsProgram;
-import acm.util.RandomGenerator;
 
 public class Main extends GraphicsProgram
 {
@@ -20,16 +20,25 @@ public class Main extends GraphicsProgram
 	public static final int WINDOW_X = 1000;
 	public static final int WINDOW_Y = 1000;
 	public static final int BUTTERFLY_HEIGHT = 100;
+	private static final int SCORE_HEIGHT = 25;
+	private static final int SCORE_WIDTH = 80;
+	private int x;
 	
-	
-	Net NET = new Net(WINDOW_X-150,WINDOW_Y-350,Color.blue);
+	private GLabel scoringLabel;
+	private int score;
+	Net net = new Net(WINDOW_X-150,WINDOW_Y-350,Color.blue);
 	
 	public void init()
 	{
 		/**Set the size of the applet*/
 		setSize(WINDOW_X,WINDOW_Y);
-		
 		addKeyListeners();
+		// add score label
+				x = (WINDOW_X - SCORE_WIDTH) / 2;
+				scoringLabel = new GLabel("Score: 0", x, SCORE_HEIGHT);
+				
+				scoringLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 20));
+				add(scoringLabel);
 	}
 	
 	public void run()
@@ -43,12 +52,15 @@ public class Main extends GraphicsProgram
 	public void animate()
 	{
 		
+		// tell whether to end game
+		boolean continueGame = true;
+		
 		Butterfly butterfly = new Butterfly(Color.YELLOW);
 		butterfly.setLocation(BUTTERFLY_HEIGHT/2,(int) (Math.random( )*(WINDOW_Y-BUTTERFLY_HEIGHT)));
-		add(NET);
+		add(net);
 		add(butterfly);
 		
-		while(true)
+		while(continueGame)
 		{
 			butterfly.move(4, 0);
 			pause(15);
@@ -58,6 +70,16 @@ public class Main extends GraphicsProgram
 				butterfly.setLocation(butterfly.getWidth(),(int) (Math.random( )*(WINDOW_Y-BUTTERFLY_HEIGHT)));
 			
 			}
+			
+			// collision detection between two objects
+			GRectangle netBox = net.getBounds();
+			GRectangle butterflyBox = butterfly.getBounds();
+				
+			if (butterflyBox.intersects(netBox))
+				{
+					butterfly.setLocation(butterfly.getWidth(),(int) (Math.random( )*(WINDOW_Y-BUTTERFLY_HEIGHT)));
+					playerScored();
+				}
 		
 		}
 	}
@@ -66,13 +88,23 @@ public class Main extends GraphicsProgram
 	{
 		if (event.getKeyCode() == KeyEvent.VK_UP) 
 		{
-			NET.move(0,-40);
+			net.move(0,-40);
+			
+
 		}
 		
 		if (event.getKeyCode() == KeyEvent.VK_DOWN) 
 		{
-			NET.move(0,40);
+			net.move(0,40);
 		}
+	}
+	
+	public void playerScored() {
+		// increment to score
+		score++;
+		
+		// display new score on screen
+		scoringLabel.setLabel("Score: " + score);
 	}
 
 }
